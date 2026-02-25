@@ -21,6 +21,6 @@ An AI-powered chatbot for answering student queries about admissions, courses, f
 
 ### 1. Clone repository
 
-```bash
+bash
 git clone https://github.com/YOUR_USERNAME/college_chatbot.git
 cd college_chatbot
