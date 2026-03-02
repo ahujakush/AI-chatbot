@@ -2,157 +2,144 @@
 document.addEventListener("DOMContentLoaded", () => {
     
     // === ELEMENTS ===
+    const chatContainer = document.getElementById("chatContainer");
     const buddyLauncher = document.getElementById("buddyLauncher");
-    const chatWidget = document.getElementById("chatWidget");
-    const closeBtn = document.getElementById("closeChat");
     const userInput = document.getElementById("userInput");
     const chatBox = document.getElementById("chat-box");
-    const trailContainer = document.getElementById("cursor-trail");
-
-    // Face Elements for tracking
-    const eyes = document.querySelectorAll(".eye");
-    const smallEyes = document.querySelectorAll(".eye-small");
+    
+    // Face Elements for tracking - Select ALL eyes from both launcher and chat header
+    const eyes = document.querySelectorAll(".bot-face .eye");
 
     // === TOGGLE CHAT ===
-    if (buddyLauncher) {
-        buddyLauncher.addEventListener("click", () => {
-            chatWidget.classList.add("active");
-            document.querySelector(".bg-wrap").classList.add("blur-active"); // Blur background
-            buddyLauncher.style.transform = "scale(0) translateY(20px)";
-            buddyLauncher.style.opacity = "0";
-            setTimeout(() => userInput.focus(), 300);
-        });
+    window.toggleChat = function() {
+        // Toggle Active State
+        chatContainer.classList.toggle("active");
+        
+        if (chatContainer.classList.contains("active")) {
+            // Chat is OPEN
+            buddyLauncher.classList.add("hidden");
+            userInput.focus();
+        } else {
+            // Chat is CLOSED
+            buddyLauncher.classList.remove("hidden");
+        }
+    };
+
+    // Open chat if user clicks a nav link that calls focusChat
+    // We override the previous inline logic slightly to ensure open
+    window.focusChat = function(topic) {
+        if (!chatContainer.classList.contains("active")) {
+            toggleChat();
+        }
+        
+        if(topic === 'Apply Now') {
+            window.open('https://admission.sgtuniversity.ac.in/', '_blank');
+        } else {
+            // Optional: Auto-fill
+            userInput.value = "Tell me about " + topic;
+            userInput.focus();
+        }
     }
 
-    if (closeBtn) {
-        closeBtn.addEventListener("click", () => {
-            chatWidget.classList.remove("active");
-            document.querySelector(".bg-wrap").classList.remove("blur-active"); // Unblur background
-            buddyLauncher.style.transform = "none";
-            buddyLauncher.style.opacity = "1";
-        });
-    }
 
-    // === MOUSE TRACKING (Eyes & Glitter) ===
+    // === MOUSE TRACKING (Eyes) ===
     document.addEventListener("mousemove", (e) => {
         const x = e.clientX;
         const y = e.clientY;
 
-        // 1. Glitter Trail
-        createParticle(x, y);
+        // Eye Movement
+        eyes.forEach(eye => {
+            const rect = eye.getBoundingClientRect();
+            // Only move visible eyes to save performance (optional but good)
+            if(rect.width === 0) return;
 
-        // 2. Eye Movement (Launcher Face)
-        eyes.forEach(eye => moveEye(eye, x, y));
-        
-        // 3. Eye Movement (Widget Header Face)
-        if (chatWidget.classList.contains("active")) {
-          smallEyes.forEach(eye => moveEye(eye, x, y));
-        }
+            const eyeX = rect.left + rect.width / 2;
+            const eyeY = rect.top + rect.height / 2;
+            
+            const angle = Math.atan2(y - eyeY, x - eyeX);
+            // Limit distance so eyes don't fly out of sockets
+            const dist = Math.min(3, Math.hypot(x - eyeX, y - eyeY) / 20); 
+
+            const moveX = Math.cos(angle) * dist;
+            const moveY = Math.sin(angle) * dist;
+
+            eye.style.transform = `translate(${moveX}px, ${moveY}px)`;
+        });
     });
-
-    function moveEye(eye, mouseX, mouseY) {
-        const rect = eye.getBoundingClientRect();
-        const eyeX = rect.left + rect.width / 2;
-        const eyeY = rect.top + rect.height / 2;
-        
-        const angle = Math.atan2(mouseY - eyeY, mouseX - eyeX);
-        const dist = Math.min(3, Math.hypot(mouseX - eyeX, mouseY - eyeY) / 10); // Limit distance
-
-        const moveX = Math.cos(angle) * dist;
-        const moveY = Math.sin(angle) * dist;
-
-        eye.style.transform = `translate(${moveX}px, ${moveY}px)`;
-    }
-
-    // === PARTICLE SYSTEM ===
-    function createParticle(x, y) {
-        if (!trailContainer) return;
-
-        const p = document.createElement("div");
-        p.className = "trail-particle";
-        
-        // Random offset for "spray" effect
-        const ox = (Math.random() - 0.5) * 12;
-        const oy = (Math.random() - 0.5) * 12;
-
-        p.style.left = (x + ox) + "px";
-        p.style.top = (y + oy) + "px";
-
-        // Random Size
-        const s = Math.random() * 5 + 3;
-        p.style.width = s + "px";
-        p.style.height = s + "px";
-
-        // Random Color (Pink/White/Gold)
-        // Hue 330 (Pink), 50 (Gold)
-        const hue = Math.random() > 0.7 ? 50 : 330;
-        const light = 60 + Math.random() * 40;
-        p.style.background = `hsl(${hue}, 90%, ${light}%)`;
-        p.style.boxShadow = `0 0 ${s*2}px hsl(${hue}, 80%, 60%)`;
-
-        trailContainer.appendChild(p);
-
-        setTimeout(() => p.remove(), 750);
-    }
 
     // === MESSAGING LOGIC ===
     window.sendMessage = async function() {
         const inputField = userInput;
-        const text = inputField.value.trim();
-        if (!text) return;
+        const message = inputField.value.trim();
+        if (!message) return;
 
-        addMsg(text, "user");
+        // 1. Add User Message
+        appendMessage(message, "user");
         inputField.value = "";
-        inputField.disabled = true;
 
-        const loadId = addMsg("Thinking...", "bot");
-
+        // 2. Show Typing Indicator
+        const loadingId = "loading-" + Date.now();
+        const loadingDiv = document.createElement("div");
+        loadingDiv.id = loadingId;
+        loadingDiv.classList.add("message", "bot", "loading");
+        loadingDiv.innerHTML = `
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        `;
+        chatBox.appendChild(loadingDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+        
         try {
-            const res = await axios.post("/chat", { message: text });
-            document.getElementById(loadId).remove();
+            // 3. Send to Backend
+            const response = await axios.post("/chat", { message: message });
             
-            // Just append the message
-            addMsg(res.data.response, "bot");
-        } catch (err) {
-            document.getElementById(loadId)?.remove();
-            addMsg("Oops! My connection is fuzzy. Try again.", "bot");
-        } finally {
-            inputField.disabled = false;
-            inputField.focus();
+            // Remove Loading Indicator
+            const loader = document.getElementById(loadingId);
+            if(loader) loader.remove();
+
+            // 4. Add Bot Response
+            const botReply = response.data.response;
+            appendMessage(botReply, "bot");
+
+        } catch (error) {
+            console.error(error);
+            // Remove Loading Indicator
+            const loader = document.getElementById(loadingId);
+            if(loader) loader.remove();
+            
+            appendMessage("Sorry, I'm having trouble connecting to the server. Please try again later.", "bot");
         }
     };
 
-    window.sendQuick = function(txt) {
-        if(!userInput) return;
-        userInput.value = txt;
+    window.sendQuick = function(text) {
+        userInput.value = text;
         sendMessage();
     };
 
-    function addMsg(txt, type) {
-        const div = document.createElement("div");
-        div.className = "message " + type;
-        div.innerHTML = txt;
-        div.id = "msg-" + Date.now();
+    function appendMessage(text, sender) {
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add("message", sender);
         
-        // Insert before chips if they exist
-        const chips = document.querySelector(".quick-chips");
-        if (chips) {
-            // If the last element is chips, insert before it
-            chatBox.insertBefore(div, chips);
-        } else {
-            chatBox.appendChild(div);
-        }
+        // Format basic Markdown-like syntax (bold, newlines)
+        // Simple formatter
+        let formattedText = text
+            .replace(/\n/g, "<br>")
+            .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+
+        msgDiv.innerHTML = formattedText;
         
-        chatBox.scrollTop = chatBox.scrollHeight;
-        return div.id;
+        chatBox.appendChild(msgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll
     }
 
-    // Enter Key
-    if(userInput) {
-        userInput.addEventListener("keypress", (e) => {
-            if(e.key === "Enter") sendMessage();
-        });
-    }
+    // Allow Enter key to send
+    userInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") sendMessage();
+    });
 
 });
+
+
+
 

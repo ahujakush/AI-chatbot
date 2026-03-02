@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SGT University | AI Assistant</title>
-    <!-- Preload the first background image for instant loading -->
-    <link rel="preload" as="image" href="{{ url_for('static', filename='images/1582699008phpTtzv2b.jpg') }}">
+    <!-- Preload the background image -->
+    <link rel="preload" as="image" href="{{ url_for('static', filename='images/universityLPBanner.webp') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"></script>
 </head>
@@ -15,95 +15,137 @@
 
     <!-- Background -->
     <div class="bg-wrap">
-        <div class="bg-slide bg-1"></div>
-        <div class="bg-slide bg-2"></div>
-        <div class="bg-slide bg-3"></div>
-        <div class="bg-slide bg-4"></div>
-        <div class="bg-slide bg-5"></div>
+        <div class="bg-image"></div>
         <div class="bg-overlay"></div>
     </div>
 
-    <!-- Cursor Trail -->
-    <div id="cursor-trail"></div>
+    <!-- Background Shapes/Grid -->
+    <div class="tech-grid"></div>
 
     <!-- Navbar -->
     <nav class="navbar">
         <div class="nav-content">
             <div class="brand">
-                <img src="https://sgtuniversity.ac.in/assets/images/sgtuFootLogo.svg" alt="SGT University">
+                <div class="logo-container">
+                    <img src="https://sgtuniversity.ac.in/assets/images/sgtuFootLogo.svg" alt="SGT University" class="logo-img">
+                </div>
             </div>
             <div class="menu">
-                <a href="#">Admissions</a>
-                <a href="#">Courses</a>
-                <a href="#">Fees</a>
-                <a href="#">Placements</a>
-                <a href="#" class="btn-apply">Apply Now</a>
+                <button onclick="focusChat('Admissions')" class="nav-link">Admissions</button>
+                <button onclick="focusChat('Courses')" class="nav-link">Courses</button>
+                <button onclick="focusChat('Fees')" class="nav-link">Fees</button>
+                <button onclick="focusChat('Placements')" class="nav-link">Placements</button>
+                <a href="#" class="btn-apply" onclick="focusChat('Apply Now')">APPLY NOW <i class="fa-solid fa-arrow-right"></i></a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Content -->
-    <header class="hero">
-        <div class="hero-text">
-            <h1>Welcome to<br><span>SGT University</span></h1>
-            <p class="subtitle">Located in Gurugram, Haryana</p>
-            <p class="desc">
-                Your gateway to a successful future. Discover our diverse range of courses and vibrant campus life.
-            </p>
-            <div class="cta-group">
-                <a href="https://sgtuniversity.ac.in/programmes/" target="_blank" class="btn-primary">Explore Programs</a>
-                <a href="https://sgtuniversity.ac.in/" target="_blank" class="btn-secondary">Watch Video</a>
-            </div>
-        </div>
-    </header>
-
-    <!-- BUDDY LAUNCHER (The Face) -->
-    <div id="buddyLauncher" class="buddy-launcher">
-        <div class="buddy-face">
-            <div class="eye left"></div>
-            <div class="nose"></div>
-            <div class="eye right"></div>
-            <div class="mouth"></div>
-        </div>
-        <span class="buddy-label">Chat with Buddy!</span>
-    </div>
-
-    <!-- CHAT WIDGET -->
-    <div id="chatWidget" class="chat-widget">
-        <div class="chat-header">
-            <div class="header-left">
-                <div class="buddy-avatar-small">
-                    <div class="eye-small left"></div>
-                    <div class="eye-small right"></div>
+    <!-- Main Content -->
+    <main class="hero-section">
+        <div class="hero-content">
+            <div class="hero-left">
+                <h1>Welcome to<br><span class="gradient-text">SGT University</span></h1>
+                <p class="tagline">Shaping Futures. Empowering Minds.</p>
+                
+                <div class="location-badge">
+                    <i class="fa-solid fa-location-dot"></i> Located in Gurugram, Haryana
                 </div>
-                <div class="header-info">
-                    <h3>SGT Buddy</h3>
-                    <span class="status">Online • AI Assistant</span>
+
+                <div class="hero-buttons">
+                    <a href="https://sgtuniversity.ac.in/list-of-programmes.html" target="_blank" class="btn-primary-glow">Explore Programs <i class="fa-solid fa-arrow-right"></i></a>
+                    <a href="https://www.youtube.com/@SGTUniversityGurgaonNCR" target="_blank" class="btn-video"><i class="fa-solid fa-play"></i> Watch Campus Tour</a>
+                </div>
+
+                <div class="stats-row">
+                    <div class="stat-item">
+                        <div class="stat-icon"><i class="fa-solid fa-book-open"></i></div>
+                        <div class="stat-info">
+                            <strong>150+</strong>
+                            <span>Courses</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="stat-info">
+                            <strong>95%</strong>
+                            <span>Placement Rate</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon"><i class="fa-solid fa-building-columns"></i></div>
+                        <div class="stat-info">
+                            <strong>Modern</strong>
+                            <span>Campus</span>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <button id="closeChat" class="close-btn"><i class="fa-solid fa-xmark"></i></button>
-        </div>
 
-        <div id="chat-box" class="chat-body">
-            <!-- Welcome Message -->
-            <div class="message bot">
-                Hello! I'm your SGT University Buddy. ??<br>
-                Ask me about admissions, fees, or campus life!
+            <div class="hero-right">
+                <!-- Chat Interface Card - Initially Hidden or Triggered -->
+                 <div class="chat-card-container hidden" id="chatContainer">
+                    <div class="chat-card-glow"></div>
+                    <div class="chat-card" id="chatCard">
+                        <div class="chat-header">
+                            <div class="bot-info">
+                                <h3>SGT Buddy</h3>
+                                <span class="ai-badge">AI Assistant</span>
+                                <div class="status-indicator"><span class="dot"></span> Online</div>
+                            </div>
+                            <button class="close-chat-btn" onclick="toggleChat()"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+
+                        <div class="chat-workspace" id="chat-box">
+                            <div class="message bot">
+                                Hello! 👋<br>
+                                I'm <span class="highlight">SGT Buddy</span> —<br>
+                                How can I help you today?
+                            </div>
+                            
+                            <!-- Static choices inside chat as shown in design -->
+                            <div class="action-grid">
+                                <button onclick="sendQuick('Admissions')"><i class="fa-solid fa-briefcase"></i> Admissions</button>
+                                <button onclick="sendQuick('Courses')"><i class="fa-regular fa-comment-dots"></i> Courses</button>
+                                <button onclick="sendQuick('Fees')"><i class="fa-solid fa-hand-holding-dollar"></i> Fees</button>
+                                <button onclick="sendQuick('Placements')"><i class="fa-solid fa-chart-simple"></i> Placements</button>
+                            </div>
+                        </div>
+
+                        <div class="chat-input-area">
+                            <input type="text" id="userInput" placeholder="Type your question..." autocomplete="off">
+                            <button id="sendBtn" class="send-btn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                 </div>
+
+                 <!-- Buddy Launcher (Always Visible Face) -->
+                 <div class="buddy-launcher" id="buddyLauncher" onclick="toggleChat()">
+                    <div class="bot-avatar-3d small">
+                        <div class="bot-face">
+                            <div class="eye left"></div>
+                            <div class="eye right"></div>
+                            <div class="mouth"></div>
+                        </div>
+                    </div>
+                    <div class="launcher-glow"></div>
+                 </div>
             </div>
-            
-            <div class="quick-chips">
-                <button onclick="sendQuick('Admissions process?')">Admissions</button>
-                <button onclick="sendQuick('What courses are available?')">Courses</button>
-                <button onclick="sendQuick('Tell me about placements')">Placements</button>
-            </div>
         </div>
+    </main>
 
-        <div class="chat-footer">
-            <input type="text" id="userInput" placeholder="Type a message..." autocomplete="off">
-            <button id="sendBtn" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
-        </div>
-    </div>
-
+    <!-- JS for Logic -->
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        function focusChat(topic) {
+            const chatInput = document.getElementById('userInput');
+            chatInput.focus();
+            if(topic === 'Apply Now') {
+                window.open('https://admission.sgtuniversity.ac.in/', '_blank');
+            } else {
+                // If you want the button click to immediately ask the question:
+                // sendQuick('Tell me about ' + topic);
+            }
+        }
+    </script>
 </body>
 </html>
